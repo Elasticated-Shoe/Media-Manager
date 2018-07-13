@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Media Manager</title>
+		<link rel="shortcut icon" type="image/x-icon" href="/static/icon.ico"/>
+        <link rel="stylesheet" type="text/css" href="/static/css/media_manager.css">
+        <script>
+            function httpGet(url, data, return_set) {
+                    var xhr = new XMLHttpRequest();
+                    if (typeof return_set !== 'undefined')
+                    {
+                        sett_arr = [];
+                        inputs = document.getElementsByTagName('input');
+                        for (i = 0; i < inputs.length; ++i) 
+                        {
+                            sett_arr.push(inputs[i].value);
+                        }
+                        xhr.open("POST", url, true);
+                        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                        xhr.send(sett_arr)
+                        return "ah";
+                    }
+                    if (typeof data === 'undefined')
+                    { 
+                        data = 'default';
+                        xhr.open('GET', url, true);
+                        xhr.send();
+                    }
+                    else
+                    {
+                        xhr.open("POST", url, true);
+                        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                        xhr.send(data)
+                    }
+            }
+            function show_episodes(id) {
+                document.getElementById(id).style.visibility = 'visible';
+                //document.getElementById(id).style.display = "block";
+            }
+            function hide_episodes(id) {
+                document.getElementById(id).style.visibility = 'hidden';
+                //document.getElementById(id).style.display = "none";
+            }
+        </script>
+    </head>
+	<body>
+		<div id="top_pane">
+		
+		</div>
+		<div id="main_pane">
+			<div id="control_pane">
+				<div id="settings_pane">
+					{% for setting, value in settings -%}
+					<div class="title_settings">
+						<h1 class="title">{{ setting }}</h1>
+					</div>
+					<div class="input_settings">
+						<input type="text" class="input" id="{{ setting }}" value="{{ value }}" autocomplete="off"/>
+					</div>
+					{% endfor -%}
+				</div>
+				<div id="controls_pane">
+					<a onclick="httpGet('/save_settings', 'ah', 'ah')" class="">Save Settings</a>
+					<a onclick="httpGet('/refresh_meta')" class="">Refresh Metadata</a>
+				</div>
+				<div id="vlc_pane">
+				
+				</div>
+			</div>
+			<div id="view_pane" class="killscroll">
+				<details id="film_deets">
+					<summary>Film</summary>
+					{% for name, thumb, desc, score in film_metadata %}
+					<div class="thumb_outer_style thumb_outer_size_film" tabindex="1">
+						<img class="thumb" src="{{ thumb }}">
+						<div class="testshow">
+							<p class="description">{{ desc }}</p>
+							<a onclick="httpGet('/play', '{{ name }}')">Play</a>
+						</div> 
+					</div> 
+					{% endfor -%}
+				</details>
+                <div class="">
+				
+				</div>
+				<details id="tv_deets">
+					<summary>Tv</summary>
+					{% for name, thumb, desc in tv_metadata %}
+					<div class="thumb_outer_style thumb_outer_size_tv" tabindex="1">
+						<img class="thumb" src="{{ thumb }}">
+						<div class="testshow">
+							<p class="description">{{ desc }}</p>
+							<a onclick="httpGet('/play', '{{ name }}')">Play</a>
+                            <a onclick="show_episodes('{{ name }}')">Episodes</a>
+						</div>
+					</div>
+                    <div id="{{ name }}" class="testshow_episodes killscroll">
+                        <div id="cross_box">
+                          <a onclick="hide_episodes('{{ name }}')" class="cross">X</a>
+                        </div>
+                        {% for ser in episode_metadata[name] %}
+                            {% for ep in episode_metadata[name][ser] %}
+                                {% for qwe in episode_metadata[name][ser][ep] %}
+                                    <p>{{ qwe }}</p>
+                                    <p>{{ episode_metadata[name][ser][ep][qwe] }}</p>
+                                    <a onclick="httpGet('/play', '{{ name }} - s{{ ser }}e{{ ep }}')">Play</a>
+                                {% endfor -%}
+                            {% endfor -%}
+                        {% endfor -%}
+                    </div>
+					{% endfor -%}
+				</details>
+                <div id="resume">
+                    {% for item in tv_resume %}
+                        <p>{{ item[0] }}</p>
+                        <a onclick="httpGet('/resume', '{{ item[0] }} - s{{ item[1] }}e{{ item[2] }} ppp {{ item[3] }}')">Resume</a>
+                    {% endfor -%}
+                </div>
+				<div id="dash">
+				</div>
+			</div>
+		</div>
+		<div id="bottom_pane">
+		
+		</div>
+	</body>
+</html>
+
+

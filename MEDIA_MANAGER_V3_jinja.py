@@ -137,6 +137,8 @@ def play(path, mode, resume_point = None):
                                                     samplerate=44100}:http{mux=ffmpeg{mux=flv},dst=:8080/yes}"""
     print(command_string)
     p = subprocess.Popen(command_string)
+    time.sleep(2)
+    vlc_play_next()
     
 def vlc_play_previous():
     s = requests.Session()

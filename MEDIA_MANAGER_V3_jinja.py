@@ -137,6 +137,16 @@ def play(path, mode, resume_point = None):
                                                     samplerate=44100}:http{mux=ffmpeg{mux=flv},dst=:8080/yes}"""
     print(command_string)
     p = subprocess.Popen(command_string)
+    
+def vlc_play_previous():
+    s = requests.Session()
+    s.auth = (program_settings['vlc user'], program_settings['vlc password'])
+    r = s.get("http://127.0.0.1:8080/requests/status.xml?command=pl_previous")
+
+def vlc_play_next():
+    s = requests.Session()
+    s.auth = (program_settings['vlc user'], program_settings['vlc password'])
+    r = s.get("http://127.0.0.1:8080/requests/status.xml?command=pl_next")
 
 def next_ep():
     global vlc_result
@@ -391,11 +401,17 @@ def html_interface(): # all user input will go through here, consider checking i
     def play_next_ep():
         if next_ep() == False: # Won't play next episode straight away, waits till current is finished. fix
             print("Failed To Play Next Episode")
+            return "False"
+        vlc_play_next()
+        return "True"
         
     @app.route("/previous")
     def play_previous_ep():
         if previous_ep() == False:
             print("Failed To Play Previous Episode")
+            return "False"
+        vlc_play_previous()
+        return "True"
 
     @app.route('/vol_up')
     def volup():

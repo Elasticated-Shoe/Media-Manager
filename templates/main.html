@@ -5,7 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Media Manager</title>
 		<link rel="shortcut icon" type="image/x-icon" href="/static/icon.ico"/>
-        <link rel="stylesheet" type="text/css" href="/static/css/media_manager.css">
+        <link rel="stylesheet" href="/static/css/foundation.css">
+        <link rel="stylesheet" href="/static/css/app.css">
         <script>
             function httpGet(url, data, return_set) {
                     var xhr = new XMLHttpRequest();
@@ -35,97 +36,117 @@
                         xhr.send(data)
                     }
             }
-            function show_episodes(id) {
-                document.getElementById(id).style.visibility = 'visible';
-                //document.getElementById(id).style.display = "block";
-            }
-            function hide_episodes(id) {
-                document.getElementById(id).style.visibility = 'hidden';
-                //document.getElementById(id).style.display = "none";
-            }
         </script>
     </head>
 	<body>
-		<div id="top_pane">
-		
-		</div>
-		<div id="main_pane">
-			<div id="control_pane">
-				<div id="settings_pane">
-					{% for setting, value in settings -%}
-					<div class="title_settings">
-						<h1 class="title">{{ setting }}</h1>
-					</div>
-					<div class="input_settings">
-						<input type="text" class="input" id="{{ setting }}" value="{{ value }}" autocomplete="off"/>
-					</div>
-					{% endfor -%}
-				</div>
-				<div id="controls_pane">
-					<a onclick="httpGet('/save_settings', 'ah', 'ah')" class="">Save Settings</a>
-					<a onclick="httpGet('/refresh_meta')" class="">Refresh Metadata</a>
-				</div>
-				<div id="vlc_pane">
-				
-				</div>
-			</div>
-			<div id="view_pane" class="killscroll">
-				<details id="film_deets">
-					<summary>Film</summary>
-					{% for name, thumb, desc, score in film_metadata %}
-					<div class="thumb_outer_style thumb_outer_size_film" tabindex="1">
-						<img class="thumb" src="{{ thumb }}">
-						<div class="testshow">
-							<p class="description">{{ desc }}</p>
-							<a onclick="httpGet('/play', '{{ name }}')">Play</a>
-						</div> 
-					</div> 
-					{% endfor -%}
-				</details>
-                <div class="">
-				
-				</div>
-				<details id="tv_deets">
-					<summary>Tv</summary>
-					{% for name, thumb, desc in tv_metadata %}
-					<div class="thumb_outer_style thumb_outer_size_tv" tabindex="1">
-						<img class="thumb" src="{{ thumb }}">
-						<div class="testshow">
-							<p class="description">{{ desc }}</p>
-							<a onclick="httpGet('/play', '{{ name }}')">Play</a>
-                            <a onclick="show_episodes('{{ name }}')">Episodes</a>
-						</div>
-					</div>
-                    <div id="{{ name }}" class="testshow_episodes killscroll">
-                        <div id="cross_box">
-                          <a onclick="hide_episodes('{{ name }}')" class="cross">X</a>
-                        </div>
-                        {% for ser in episode_metadata[name] %}
-                            {% for ep in episode_metadata[name][ser] %}
-                                {% for qwe in episode_metadata[name][ser][ep] %}
-                                    <p>{{ qwe }}</p>
-                                    <p>{{ episode_metadata[name][ser][ep][qwe] }}</p>
-                                    <a onclick="httpGet('/play', '{{ name }} - s{{ ser }}e{{ ep }}')">Play</a>
-                                {% endfor -%}
+        <div class="grid-x" style="height: 100%;">
+            <div class="small-12" style="height: 5%;">
+                <p><a data-toggle="settings view">Toggle Settings</a></p>
+            </div>
+            <div class="sidebar small-12 medium-2 collapsed" style="height: 90%; overflow-y: auto;" id="settings" data-toggler="collapsed"> <!-- Toggle For Settings -->
+                <ul class="vertical menu accordion-menu" data-accordion-menu>
+                    <!--<li>
+                        <a href="#">Item 1</a>
+                        <ul class="menu vertical nested">
+                          <li><a href="#">Item 1A</a></li>
+                          <li><a href="#">Item 1B</a></li>
+                        </ul>
+                    </li>-->
+                    {% for setting, value in settings -%}
+                        <p>{{ setting }}</p>
+                        <li><input type="text" class="input" id="{{ setting }}" value="{{ value }}" autocomplete="off"/></li>
+                        <!--<h1 class="title">{{ setting }}</h1>-->
+                    {% endfor -%}
+                </ul>
+                <div>
+                    <a onclick="httpGet('/save_settings', 'ah', 'ah')">Save Settings</a>
+                    <a onclick="httpGet('/refresh_meta')">Refresh Metadata</a>
+                </div>
+            </div>
+            <div class="small-12" style="height: 90%; overflow-y: auto;" id="view" data-toggler="medium-10">
+                <div class="grid-x">
+                    <div class="small-12"><p><a data-toggle="film">Toggle Film</a></p></div> <!-- Toggle For Film -->
+                    <div class="small-12 collapsed" id="film" data-toggler="collapsed">
+                        <div class="grid-x"> 
+                            {% for name, thumb, desc, score in film_metadata %}
+                            <div class="small-4 medium-2 large-1">
+                                <div style="width: 100%; height: auto;">
+                                    <a data-open="{{ name | replace(' ', '') | replace("'", '') }}"><img src="{{ thumb }}"></a>
+                                </div>
+                                <div class="large reveal" id="{{ name | replace(' ', '') | replace("'", '') }}" data-reveal>
+                                    <div class="grid-x">
+                                        <div class="small-12">
+                                            <p class="description">{{ desc }}</p>
+                                        </div>
+                                        <div class="small-12">
+                                            <a onclick="httpGet('/play', '{{ name }}')">Play</a>
+                                        </div>
+                                    </div>
+                                    <button class="close-button" data-close aria-label="Close modal" type="button">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            </div>
                             {% endfor -%}
-                        {% endfor -%}
+                        </div>
                     </div>
-					{% endfor -%}
-				</details>
-                <div id="resume">
+                </div>
+                <div class="grid-x">
+                    <div class="small-12"><p><a data-toggle="tv">Toggle Tv</a></p></div> <!-- Toggle For Film -->
+                    <div class="small-12 collapsed" id="tv" data-toggler="collapsed">
+                        <div class="grid-x">
+                            {% for name, thumb, desc in tv_metadata %}
+                            <div class="small-12 medium-4 large-3">
+                                <div style="width: 100%; height: auto;">
+                                    <a data-open="{{ name | replace(' ', '') | replace("'", '') }}"><img src="{{ thumb }}"></a>
+                                </div>
+                                <div class="large reveal" id="{{ name | replace(' ', '') | replace("'", '') }}" data-reveal>
+                                    <ul class="tabs" data-tabs id="tabs_{{ name | replace(' ', '') | replace("'", '') }}">
+                                        {% for ser in episode_metadata[name] %}
+                                            <li class="tabs-title {% if loop.index == 1 %}is-active{% endif %}"><a href="#tabs_{{ name | replace(' ', '') | replace("'", '') }}_{{ ser }}" aria-selected="true">Series {{ ser }}</a></li>
+                                        {% endfor -%}
+                                    </ul>
+                                    <div class="grid-x">
+                                        <div class="tabs-content" data-tabs-content="tabs_{{ name | replace(' ', '') | replace("'", '') }}">
+                                        {% for ser in episode_metadata[name] %}
+                                            <div class="tabs-panel is-active" id="tabs_{{ name | replace(' ', '') | replace("'", '') }}_{{ ser }}">
+                                                {% for ep in episode_metadata[name][ser] %}
+                                                    {% for qwe in episode_metadata[name][ser][ep] %}
+                                                        <p>{{ ep }}.) {{ qwe }}</p>
+                                                        <p>{{ episode_metadata[name][ser][ep][qwe] }}</p>
+                                                        <a onclick="httpGet('/play', '{{ name }} - s{{ ser }}e{{ ep }}')">Play</a>
+                                                    {% endfor -%}
+                                                {% endfor -%}
+                                            </div>
+                                        {% endfor -%}
+                                        </div>
+                                    </div>
+                                    <button class="close-button" data-close aria-label="Close modal" type="button">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor -%}
+                        </div>
+                    </div>
+                </div>
+                <div class="small-12">
                     {% for item in tv_resume %}
                         <p>{{ item[0] }}</p>
                         <a onclick="httpGet('/resume', '{{ item[0] }} - s{{ item[1] }}e{{ item[2] }} ppp {{ item[3] }}')">Resume</a>
                     {% endfor -%}
                 </div>
-				<div id="dash">
-				</div>
-			</div>
-		</div>
-		<div id="bottom_pane">
-		
-		</div>
-	</body>
+            </div>
+            
+            <div class="small-12" style="height: 5%;">
+                <p>not topbar</p>
+            </div>
+        </div>
+        <script src="/static/js/vendor/jquery.js"></script>
+        <script src="/static/js/vendor/what-input.js"></script>
+        <script src="/static/js/vendor/foundation.js"></script>
+        <script src="/static/js/app.js"></script>
+    </body>
 </html>
 
 

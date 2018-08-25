@@ -138,6 +138,36 @@ def play(path, mode, resume_point = None):
     print(command_string)
     p = subprocess.Popen(command_string)
 
+def next_ep():
+    global vlc_result
+    next_ep_same_season = vlc_result['name'] + " - s" + vlc_result['series'] + "e" + str("{:02}".format(int(vlc_result['episode'])+1))
+    is_file = search_media(next_ep_same_season)
+    if is_file != False:
+        play(is_file, "play")
+    else:
+        next_season_first_ep = vlc_result['name'] + " - s" + str("{:02}".format(int(vlc_result['series'])+1)) + "e01"
+        is_file = search_media(next_season_first_ep)
+        if is_file != False:
+            play(is_file, "play")
+        else:
+            return False
+    return True
+        
+def previous_ep():
+    global vlc_result
+    past_ep_same_season = vlc_result['name'] + " - s" + vlc_result['series'] + "e" + str("{:02}".format(int(vlc_result['episode'])-1))
+    is_file = search_media(past_ep_same_season)
+    if is_file != False:
+        play(is_file, "play")
+    else:
+        for x in range(51, 0, -1):
+            last_season_last_ep = vlc_result['name'] + " - s" + str("{:02}".format(int(vlc_result['series'])-1)) + "e" + str("{:02}".format(x))
+            is_file = search_media(last_season_last_ep)
+            if is_file != False:
+                play(is_file, "play")
+                break
+    return True
+    
 def connect_db(database):
     conn = sqlite3.connect(database + ".db")
     c = conn.cursor()
@@ -356,36 +386,14 @@ def html_interface(): # all user input will go through here, consider checking i
         print("placeholder")
         
     @app.route("/next")
-    def next_ep():
-        global vlc_result
-        next_ep_same_season = vlc_result['name'] + " - s" + vlc_result['series'] + "e" + str("{:02}".format(int(vlc_result['episode'])+1))
-        is_file = search_media(next_ep_same_season)
-        if is_file != False:
-            play(is_file, "play")
-        else:
-            next_season_first_ep = vlc_result['name'] + " - s" + str("{:02}".format(int(vlc_result['series'])+1)) + "e01"
-            is_file = search_media(next_season_first_ep)
-            if is_file != False:
-                play(is_file, "play")
-            else:
-                return False
-        return True
+    def play_next_ep():
+        if next_ep() == False: # Won't play next episode straight away, waits till current is finished. fix
+            print("Failed To Play Next Episode")
         
     @app.route("/previous")
-    def previous_ep():
-        global vlc_result
-        past_ep_same_season = vlc_result['name'] + " - s" + vlc_result['series'] + "e" + str("{:02}".format(int(vlc_result['episode'])-1))
-        is_file = search_media(past_ep_same_season)
-        if is_file != False:
-            play(is_file, "play")
-        else:
-            for x in range(51, 0, -1):
-                last_season_last_ep = vlc_result['name'] + " - s" + str("{:02}".format(int(vlc_result['series'])-1)) + "e" + str("{:02}".format(x))
-                is_file = search_media(last_season_last_ep)
-                if is_file != False:
-                    play(is_file, "play")
-                    break
-        return True
+    def play_previous_ep():
+        if previous_ep() == False:
+            print("Failed To Play Previous Episode")
 
     @app.route('/vol_up')
     def volup():
@@ -576,9 +584,14 @@ def fetch_tv_metadata():
                     # check the validity of results. If multiple results make sure top few matches are not similar. battlestar galactica has a remake, make sure you get the version you have
                     # if top few matches are similar just grab the most recent one unless a date is found in the file name
                     results = json.loads(r.text)['data']
-                    series_id = json.loads(r.text)['data'][0]['id']
-                    series_thumb = json.loads(r.text)['data'][0]['banner']
-                    series_description = json.loads(r.text)['data'][0]['overview']
+                    iterate_till_valid = 0
+                    while iterate_till_valid < len(results): # TVDB sometimes returns results that are missing everything
+                        series_id = json.loads(r.text)['data'][iterate_till_valid]['id']
+                        series_thumb = json.loads(r.text)['data'][iterate_till_valid]['banner']
+                        series_description = json.loads(r.text)['data'][iterate_till_valid]['overview']
+                        if series_thumb != "":
+                            break
+                        iterate_till_valid = iterate_till_valid + 1
                     series_thumb = series_thumb.replace("graphical/", "")
                     if not os.path.isdir("static\\thumbs"):
                         os.makedirs("static\\thumbs")
@@ -749,21 +762,20 @@ h.start()
 
 time.sleep(1)
 
-# replace some of the database checks with try catch. the try catch is faster than the if unless it catches often
-#webbrowser.open('http://google.co.kr', new=2)
-#webview.create_window("Media Manager", "http://localhost:5006/") #create window blocks unit the window is closed
-#exit_all()
-#chrome_path = r'"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"'
-chrome_path = r'"E:\chrome\GoogleChromePortable"' # Portable Chrome
+chrome_path = r'"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"'
+#chrome_path = r'"E:\chrome\GoogleChromePortable"' # Portable Chrome
 url = "http://localhost:5006/"
-#os.system(chrome_path + " --app=" + url) # Use Popen() instead
-p = subprocess.Popen(chrome_path + " --app=" + url)
-#time.sleep(60)
-#exit_all()
+#p = subprocess.Popen(chrome_path + " --app=" + url)
 
 while True:
     if vlc_state() == True:
         print("VLC Server Information Read")
+        if int(vlc_result['length']) - int(vlc_result['time']) <= 10:
+            if next_ep() == True:
+                print("Playing Next Episode")
+                time.sleep(11) # need to make this less lazy
+            else:
+                print("Failed To Play Next Episode")
     else:
         print("Could Not Read VLC Server")
     time.sleep(5)

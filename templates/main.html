@@ -128,19 +128,20 @@
                             </div>
                             {% endfor -%}
                         </div>
-                    </div>
                 </div>
-                <div class="small-12">
-                    {% for item in tv_resume %}
+            </div>
+            <div class="small-12 grid-x">
+                {% for item in tv_resume %}
+                    <div class="small-4 medium-2">
                         <p>{{ item[0] }}</p>
                         <a onclick="httpGet('/resume', '{{ item[0] }} - s{{ item[1] }}e{{ item[2] }} ppp {{ item[3] }}')">Resume</a>
-                    {% endfor -%}
-                </div>
+                    </div>
+                {% endfor -%}
             </div>
-            
-            <div class="small-12" style="height: 5%;">
-                <p>not topbar</p>
-            </div>
+        </div>
+        <div class="small-12" style="height: 5%;">
+            <p>not topbar</p>
+        </div>
         </div>
         <script src="/static/js/vendor/jquery.js"></script>
         <script src="/static/js/vendor/what-input.js"></script>

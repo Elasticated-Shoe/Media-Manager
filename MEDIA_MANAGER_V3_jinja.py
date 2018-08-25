@@ -310,6 +310,8 @@ def html_interface(): # all user input will go through here, consider checking i
     @app.route('/')
     def serve_page():
         print("placeholder")
+        TEMPLATE_ENVIRONMENT = Environment(autoescape=False, loader=FileSystemLoader("templates"), trim_blocks=False)
+        create_index_html(True) # Leave this in for testing changes without restarting program
         return flask_render("output.html") # Serving image files through flask is slow, should consider doing it from apache or a different webserver
 
     @app.route('/refresh_meta')

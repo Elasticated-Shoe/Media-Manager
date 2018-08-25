@@ -402,6 +402,7 @@ def html_interface(): # all user input will go through here, consider checking i
         if next_ep() == False: # Won't play next episode straight away, waits till current is finished. fix
             print("Failed To Play Next Episode")
             return "False"
+        time.sleep(2)
         vlc_play_next()
         return "True"
         
@@ -410,6 +411,7 @@ def html_interface(): # all user input will go through here, consider checking i
         if previous_ep() == False:
             print("Failed To Play Previous Episode")
             return "False"
+        time.sleep(2)
         vlc_play_previous()
         return "True"
 

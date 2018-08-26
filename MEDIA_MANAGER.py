@@ -401,6 +401,7 @@ def html_interface(): # all user input will go through here, consider checking i
         
     @app.route("/next")
     def play_next_ep():
+        print("flask next", file=sys.stderr)
         if next_ep() == False: # Won't play next episode straight away, waits till current is finished. fix
             print("Failed To Play Next Episode")
             return "False"
@@ -471,9 +472,9 @@ def vlc_state():
             if child.attrib['name'] == 'filename':
                 result = re.search("(.*) - s(\d{2})e(\d{2})", child.text) # If I Make This Expression A Setting Any Naming Scheme Could Be Used
                 if result:
-                    vlc_result['name'] = result.group(1)
-                    vlc_result['series'] = result.group(2)
-                    vlc_result['episode'] = result.group(3)
+                    vlc_result['name'] = str(result.group(1))
+                    vlc_result['series'] = str(result.group(2))
+                    vlc_result['episode'] = str(result.group(3))
                     if not read_db("Media Manager", "EXISTS", "playback_tv"): # should skip ifs and replace with try catch and own seperate function
                         if not write_db("Media Manager", "CREATE", "playback_tv",
                                         ["show", "series", "episodes", "elapsed_time"]):

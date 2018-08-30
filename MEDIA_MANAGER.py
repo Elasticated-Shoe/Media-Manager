@@ -15,6 +15,7 @@ from urllib.parse import quote
 import json
 from jinja2 import Environment, PackageLoader, FileSystemLoader
 import re
+import copy
 
 import win32ui
 #import gi
@@ -325,6 +326,10 @@ def html_interface(): # all user input will go through here, consider checking i
         TEMPLATE_ENVIRONMENT = Environment(autoescape=False, loader=FileSystemLoader("templates"), trim_blocks=False)
         create_index_html(True) # Leave this in for testing changes without restarting program
         return flask_render("output.html") # Serving image files through flask is slow, should consider doing it from apache or a different webserver
+
+    @app.route('/reveal')
+    def serve_reveal():
+        return flask_render("reveals_out.html") # Serving image files through flask is slow, should consider doing it from apache or a different webserver
 
     @app.route('/refresh_meta')
     def refresh_meta():
@@ -757,9 +762,14 @@ def create_index_html(debug = False):
         'tv_resume' : read_db("Media Manager", "DUMP", "playback_tv")
         #'film_resume' : read_db("Media Manager", "DUMP", "playback_film")
     }
+    context2 = copy.deepcopy(context) # Must deepcopy, can't reuse. Not sure why.
     #
     with open(fname, 'w', encoding='utf-8') as f:
         html = render_template('main.html', context)
+        f.write(html)
+    #
+    with open("templates/reveals_out.html", 'w', encoding='utf-8') as f:
+        html = render_template('reveals.html', context2)
         f.write(html)
 	
 def exit_all():

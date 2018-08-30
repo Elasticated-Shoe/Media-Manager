@@ -71,9 +71,9 @@
                             {% for name, thumb, desc, score in film_metadata %}
                             <div class="small-4 medium-2 large-1">
                                 <div style="width: 100%; height: auto;">
-                                    <a data-open="{{ name | replace(' ', '') | replace("'", '') }}"><img class="lazy" data-src="{{ thumb }}" style="min-height: 60px;"></a>
+                                    <a data-open="{{ name | replace(' ', '') | replace("'", '') }}"><img class="lazy" data-src="{{ thumb }}" style="min-height: 235px;"></a>
                                 </div>
-                                <div class="large reveal" id="{{ name | replace(' ', '') | replace("'", '') }}" data-reveal>
+                                {# <div class="large reveal" id="{{ name | replace(' ', '') | replace("'", '') }}" data-reveal>
                                     <div class="grid-x">
                                         <div class="small-12">
                                             <p class="description">{{ desc }}</p>
@@ -85,7 +85,7 @@
                                     <button class="close-button" data-close aria-label="Close modal" type="button">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
-                                </div>
+                                </div> #}
                             </div>
                             {% endfor -%}
                         </div>
@@ -100,7 +100,7 @@
                                 <div style="width: 100%; height: auto;">
                                     <a data-open="{{ name | replace(' ', '') | replace("'", '') }}"><img class="lazy" data-src="{{ thumb }}" style="min-height: 235px;"></a>
                                 </div>
-                                <div class="large reveal" id="{{ name | replace(' ', '') | replace("'", '') }}" data-reveal>
+                                {# <div class="large reveal" id="{{ name | replace(' ', '') | replace("'", '') }}" data-reveal>
                                     <ul class="tabs" data-tabs id="tabs_{{ name | replace(' ', '') | replace("'", '') }}">
                                         {% for ser in episode_metadata[name] %}
                                             <li class="tabs-title {% if loop.index == 1 %}is-active{% endif %}"><a href="#tabs_{{ name | replace(' ', '') | replace("'", '') }}_{{ ser }}" aria-selected="true">Series {{ ser }}</a></li>
@@ -124,7 +124,7 @@
                                     <button class="close-button" data-close aria-label="Close modal" type="button">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
-                                </div>
+                                </div> #}
                             </div>
                             {% endfor -%}
                         </div>
@@ -154,11 +154,25 @@
                 let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
                   entries.forEach(function(entry) {
                     if (entry.isIntersecting) {
-                      let lazyImage = entry.target;
-                      console.log(lazyImage.dataset.src);
-                      lazyImage.src = lazyImage.dataset.src;
-                      lazyImage.classList.remove("lazy");
-                      lazyImageObserver.unobserve(lazyImage);
+                        let lazyImage = entry.target;
+                        console.log(lazyImage.dataset.src);
+                        lazyImage.src = lazyImage.dataset.src;
+                        
+                        var element_id = jQuery(lazyImage).parent().attr("data-open");
+                        
+                        $("<div/>").load("/reveal #" +  element_id, function () {
+                            $(this).appendTo("body").unwrap();//unwrap removes the temp div
+                        });
+                        
+                        jQuery(lazyImage).parent().on('click', function() {
+                            $(document).foundation();
+                            //- re-bind events
+                            bindEm();
+                            return false;
+                        });
+                        
+                        lazyImage.classList.remove("lazy");
+                        lazyImageObserver.unobserve(lazyImage);
                     }
                   });
                 });
@@ -169,6 +183,43 @@
               } else {
                 // Possibly fall back to a more compatible method here
               }
+            });
+        </script>
+        <script> // https://jsfiddle.net/kronocian/u8dfcw0h/8/
+            $(document).ready(function () {
+                
+                $(document).foundation();
+
+                //- Function to bind handlers to the relavent Foundation events
+                function bindEm() {
+                    $(document).on('open.fndtn.reveal', '[data-reveal]', function () {
+                      alert("'open.fndtn.reveal' fired.");
+                    });
+                    
+                    $(document).on('opened.fndtn.reveal', '[data-reveal]', function () {
+                      alert("'opened.fndtn.reveal' fired.");
+                    });
+                }
+                
+                //- Go ahead an bind them
+                bindEm();
+                
+                $('#js-modal').on('click', function() {
+                    var $modal = $('<div class="reveal-modal" data-reveal><p>This modal was added with JS.</p><a class="close-reveal-modal">&#215;</a></div>');
+                    //- append it to [body] ahead of time
+                    $('body').append($modal);
+                    
+                    //- re-invoke foundation
+                    $(document).foundation();
+                    
+                    //- re-bind events
+                    bindEm();
+                    
+                    //- Now, try to open it
+                    $modal.foundation('reveal', 'open');
+                    return false;
+                });
+                
             });
         </script>
     </body>

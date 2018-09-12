@@ -803,6 +803,10 @@ url = "http://localhost:5006/"
 while True:
     if vlc_state() == True:
         print("VLC Server Information Read")
+        if type(vlc_result['name']) != str:
+            print("Waiting For Media")
+            time.sleep(5)
+            continue
         if int(vlc_result['length']) - int(vlc_result['time']) <= 10:
             if next_ep() == True:
                 print("Playing Next Episode")

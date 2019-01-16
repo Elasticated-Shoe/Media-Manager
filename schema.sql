@@ -31,7 +31,7 @@ CREATE TABLE User_Tags (
 );
 
 CREATE TABLE Catalogue (
-    index int NOT NULL AUTO_INCREMENT,
+    keyIndex int NOT NULL AUTO_INCREMENT,
     title varchar(50),
     series_album TINYINT,
     episode_track TINYINT,
@@ -45,10 +45,10 @@ CREATE TABLE Catalogue (
     thumb char(32),
     catagories varchar(255),
     reviews varchar(255),
-    PRIMARY KEY (theKey)
+    PRIMARY KEY (keyIndex)
 );
 
 CREATE TABLE Banned_IP (
     IP VARBINARY(16) NOT NULL,
-    banDate int NOT NULL,
+    banDate int NOT NULL
 );

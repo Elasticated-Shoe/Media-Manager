@@ -50,5 +50,6 @@ CREATE TABLE Catalogue (
 
 CREATE TABLE Banned_IP (
     IP VARBINARY(16) NOT NULL,
-    banDate int NOT NULL
+    banDate int NOT NULL,
+    PRIMARY KEY (IP)
 );

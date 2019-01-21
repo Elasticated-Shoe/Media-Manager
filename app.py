@@ -1,14 +1,16 @@
-from flask import Flask
+from flask import Flask, session
 from flask_caching import Cache
 import protected.globals as shared
 import protected.dashboardController as dashController
 
 app = Flask(__name__, template_folder='protected/views')
+app.config['SECRET_KEY'] = shared.globalSettings["flask"]["key"]
 shared.cache.init_app(app)
 
 @app.before_request
 def runPreCheck():
-    print("Before Request")
+    if "sessionStatus" not in session or session["sessionStatus"] != "loggedIn":
+        return "Not Logged In"
 
 @app.route('/')
 def index():

@@ -1,3 +1,4 @@
 config.ini
 static/img/thumbnails/*
+testdir
 __pycache__/

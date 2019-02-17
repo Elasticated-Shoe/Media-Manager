@@ -17,10 +17,13 @@
                 {% include('partials/footer.html') %}
             </div>
         </div>
-        <script src="static/js/vendor/foundation.min.js"></script>
-        <script src="static/js/vendor/what-input.js"></script>
-        <script src="static/js/vendor/fuse.min.js"></script>
-        <script src="static/js/app.js"></script>
+        <!-- <script src="static/js/vendor/jquery.js"></script>
+        <script src="static/js/vendor/foundation.min.js"></script>-->
+        <script async src="static/js/vendor/bundle.js"></script>
+        <script async src="static/js/app.js"></script>
+        <script id="template" type="x-tmpl-mustache">
+            Hello {{ name }}!
+        </script>
         {% for script in scripts %}
             <script src="{{ script }}"></script>
         {% endfor %}

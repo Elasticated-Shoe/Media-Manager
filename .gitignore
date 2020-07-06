@@ -1,4 +1,8 @@
-config.ini
-static/img/thumbnails/*
-testdir
-__pycache__/
+*.csproj.user
+.DS_Store
+bin/
+obj/
+.vs/
+packages/
+node_modules/
+dist/
